@@ -10,8 +10,9 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files
+# Package Files (Gradle wrapper jar는 제외)
 *.jar
+!gradle-wrapper.jar
 *.war
 *.nar
 *.ear
@@ -62,12 +63,11 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
-# Gradle
+# Gradle (Wrapper는 포함)
 .gradle/
 build/
+**/build/
 gradle-app.setting
-!gradle-wrapper.jar
-!gradle-wrapper.properties
 
 # macOS
 .DS_Store
@@ -98,12 +98,6 @@ $RECYCLE.BIN/
 *~.nib
 *.old
 *.orig
-
-# JetBrains IDEs
-.idea/
-*.iml
-cmake-build-*/
-.idea_modules/
 
 # User-specific stuff
 .idea/**/workspace.xml
