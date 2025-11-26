@@ -3,7 +3,8 @@
 > Claude AI와 함께 정리한 모던 자바 인 액션 학습 저장소
 
 [![GitHub](https://img.shields.io/badge/GitHub-dev--book--lab-181717?style=flat-square&logo=github)](https://github.com/dev-book-lab/modern-java-in-action)
-![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![Java](https://img.shields.io/badge/Java-21+-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-8.14-02303A?style=flat-square&logo=gradle&logoColor=white)
 
 ---
 
@@ -62,31 +63,39 @@
 
 1. **개념 학습**: 각 Chapter의 `README.md` 읽기
 2. **AI 대화**: 궁금한 점을 AI와 대화하며 해소
-3. **예제 실습**: `examples/` 폴더의 코드 실행 및 변형
+3. **예제 실습**: 예제 코드 실행 및 변형
 4. **심화 학습**: 추가 질문과 실험을 통한 깊이 있는 이해
 
 ---
 
-## 💻 예제 실행 방법
+## 💻 시작하기
+
+### 📋 필요 사항
+- **Java 21** 이상
+- **IntelliJ IDEA** (권장) 또는 다른 Java IDE
+
+### 1️⃣ Repository 클론
 ```bash
-# Repository 클론
 git clone https://github.com/dev-book-lab/modern-java-in-action.git
 cd modern-java-in-action
-
-# Chapter 1 예제 실행
-cd chapters/chapter01/examples
-javac FilteringApples.java
-java FilteringApples
 ```
 
----
+### 2️⃣ IntelliJ에서 열기
+```
+File → Open → modern-java-in-action 폴더 선택
+```
 
-## 🛠️ 기술 스택
+프로젝트가 자동으로 Gradle 프로젝트로 인식되고, 의존성이 다운로드됩니다.
 
-- **Language**: Java 17+
-- **Build Tool**: Maven / Gradle
-- **Testing**: JUnit 5
-- **AI Assistant**: Claude (Anthropic)
+### 3️⃣ 예제 실행
+
+각 챕터의 예제 코드를 실행하려면:
+
+1. `chapters/chapter01/examples/FilteringApples.java` 파일 열기
+2. `main()` 메서드 좌측의 **▶️ 실행 버튼** 클릭
+3. 또는 **우측 상단의 실행 버튼** 클릭
+
+> 💡 **Tip**: 각 예제는 독립적으로 실행 가능하며, IntelliJ에서 바로 실행할 수 있습니다.
 
 ---
 
