@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="images/cover.png" alt="Modern Java in Action" width="300" />
+</div>
+
 # 📚 Modern Java in Action - 학습 노트
 
 > Claude AI와 함께 정리한 모던 자바 인 액션 학습 저장소
