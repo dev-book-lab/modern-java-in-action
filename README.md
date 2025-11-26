@@ -119,17 +119,9 @@ File → Open → modern-java-in-action 폴더 선택
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
----
-
-## 🙏 References
+## 🙏 Reference
 
 - [Modern Java in Action](https://www.manning.com/books/modern-java-in-action) - Manning Publications
-- [Java Documentation](https://docs.oracle.com/en/java/) - Oracle
-- [Dev Book Lab](https://github.com/dev-book-lab) - Organization
 
 ---
 
