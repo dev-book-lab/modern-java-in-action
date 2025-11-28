@@ -1,82 +1,36 @@
-# Modern Java in Action - Chapter 01 정리
+# Chapter 01. 자바 8, 9, 10, 11: 무슨 일이 일어나고 있는가?
 
-## 📌 Chapter 1: 자바 8, 9, 10, 11 - 무슨 일이 일어나고 있는가?
+<div align="center">
 
----
+**"자바 역사상 가장 큰 변화"**
 
-## 1. 자바 8의 핵심 변화
+> *"간결한 코드 + 멀티코어 프로세서의 쉬운 활용"*
 
-### 1.1 역사적 의미
-- **자바 역사상 가장 큰 변화**가 자바 8에서 발생
-- 두 가지 핵심 요구사항:
-    1. **간결한 코드**
-    2. **멀티코어 프로세서의 쉬운 활용**
+[📖 Deep Dive](advanced/deep-dive.md) | [💻 Code](code/) | [📋 CheatSheet](advanced/cheatsheet.md)
 
-### 1.2 자바 8 이전의 문제점
-```java
-// 자바 8 이전: CPU 코어 하나만 사용
-// 나머지 코어를 사용하려면 복잡한 멀티스레드 코드 작성 필요
-for (Apple apple : inventory) {
-    if ("green".equals(apple.getColor())) {
-        result.add(apple);
-    }
-}
-// 병렬 처리를 위해서는 synchronized, 스레드 관리 등 복잡한 코드 필요
-```
+</div>
 
 ---
 
-## 2. 자바 8의 3대 핵심 기술
+## 🎯 학습 목표
 
-### 2.1 스트림 API (Stream API)
+이 챕터를 마치면 다음을 할 수 있습니다:
 
-#### 개념
-- **스트림**: 한 번에 한 개씩 만들어지는 연속적인 데이터 항목들의 모임
-- `Stream<T>`: T 형식으로 구성된 일련의 항목
-
-#### 외부 반복 vs 내부 반복
-```java
-// 외부 반복 (External Iteration) - 자바 8 이전
-List<Apple> heavyApples = new ArrayList<>();
-for (Apple apple : inventory) {
-    if (apple.getWeight() > 150) {
-        heavyApples.add(apple);
-    }
-}
-
-// 내부 반복 (Internal Iteration) - 자바 8 이후
-List<Apple> heavyApples = inventory.stream()
-    .filter(apple -> apple.getWeight() > 150)
-    .collect(Collectors.toList());
-```
-
-#### 병렬 처리
-```java
-// 순차 처리
-inventory.stream()
-    .filter(a -> a.getWeight() > 150)
-    .collect(Collectors.toList());
-
-// 병렬 처리 (멀티코어 활용)
-inventory.parallelStream()
-    .filter(a -> a.getWeight() > 150)
-    .collect(Collectors.toList());
-```
-
-**스트림의 장점:**
-- 라이브러리가 내부적으로 리스트를 나눠서 여러 CPU로 분산(fork)
-- 각 CPU에서 처리 후 결과를 합침(join)
-- synchronized 없이 안전한 병렬 처리
+- [ ] **자바 8의 3대 핵심 기술**을 이해하고 설명할 수 있다
+- [ ] **스트림 API**로 병렬 처리를 간단하게 구현할 수 있다
+- [ ] **동작 파라미터화**로 코드 중복을 제거할 수 있다
+- [ ] **메서드 참조와 람다**의 차이를 이해하고 적절히 사용할 수 있다
+- [ ] **디폴트 메서드**가 왜 필요한지 설명할 수 있다
+- [ ] **함수형 프로그래밍**의 핵심 원칙을 이해한다
 
 ---
 
-### 2.2 동작 파라미터화 (Behavior Parameterization)
+## 📚 자바 8 이전의 문제점
 
-#### 메서드를 다른 메서드의 인수로 전달
+### 코드 중복과 복잡성
 
-**자바 8 이전: 코드 중복**
 ```java
-// 녹색 사과 필터링
+// ❌ 자바 8 이전: 조건마다 메서드를 복사-붙여넣기
 public static List<Apple> filterGreenApples(List<Apple> inventory) {
     List<Apple> result = new ArrayList<>();
     for (Apple apple : inventory) {
@@ -87,7 +41,6 @@ public static List<Apple> filterGreenApples(List<Apple> inventory) {
     return result;
 }
 
-// 무거운 사과 필터링
 public static List<Apple> filterHeavyApples(List<Apple> inventory) {
     List<Apple> result = new ArrayList<>();
     for (Apple apple : inventory) {
@@ -97,25 +50,122 @@ public static List<Apple> filterHeavyApples(List<Apple> inventory) {
     }
     return result;
 }
-// 문제: 복사-붙여넣기, 유지보수 어려움
+// 문제: 코드 중복, DRY 원칙 위반, 유지보수 어려움
 ```
 
-**자바 8: 동작 파라미터화**
+### 병렬 처리의 어려움
+
 ```java
-// 조건을 메서드로 정의
-public static boolean isGreenApple(Apple apple) {
-    return "green".equals(apple.getColor());
+// ❌ 자바 8 이전: 복잡한 멀티스레드 코드
+public class ParallelSum {
+    private int[] array;
+    private int numThreads;
+    
+    public int sum() throws InterruptedException {
+        int size = (int) Math.ceil(array.length * 1.0 / numThreads);
+        int[] sums = new int[numThreads];
+        Thread[] threads = new Thread[numThreads];
+        
+        for (int i = 0; i < numThreads; i++) {
+            final int start = i * size;
+            final int end = (i + 1) * size;
+            threads[i] = new Thread(() -> {
+                int sum = 0;
+                for (int j = start; j < end && j < array.length; j++) {
+                    sum += array[j];
+                }
+                sums[i] = sum;
+            });
+            threads[i].start();
+        }
+        
+        for (int i = 0; i < numThreads; i++) {
+            threads[i].join();
+        }
+        
+        int total = 0;
+        for (int s : sums) {
+            total += s;
+        }
+        return total;
+    }
+}
+// 문제: 복잡함, 에러 발생 가능성 높음, synchronized 필요
+```
+
+---
+
+## 🚀 자바 8의 3대 핵심 기술
+
+### 1. 스트림 API (Stream API)
+
+#### 개념
+**스트림**: 한 번에 한 개씩 만들어지는 연속적인 데이터 항목들의 모임
+
+#### 외부 반복 vs 내부 반복
+
+```java
+// ❌ 외부 반복 (External Iteration)
+List<Apple> heavyApples = new ArrayList<>();
+for (Apple apple : inventory) {
+    if (apple.getWeight() > 150) {
+        heavyApples.add(apple);
+    }
 }
 
-public static boolean isHeavyApple(Apple apple) {
-    return apple.getWeight() > 150;
-}
+// ✅ 내부 반복 (Internal Iteration)
+List<Apple> heavyApples = inventory.stream()
+    .filter(apple -> apple.getWeight() > 150)
+    .collect(Collectors.toList());
+```
 
-// 하나의 메서드로 모든 조건 처리
+#### 병렬 처리가 이렇게 쉽다!
+
+```java
+// 순차 처리
+List<Apple> result = inventory.stream()
+    .filter(apple -> apple.getWeight() > 150)
+    .collect(Collectors.toList());
+
+// 병렬 처리 (멀티코어 활용)
+List<Apple> result = inventory.parallelStream()  // 이 한 줄의 차이!
+    .filter(apple -> apple.getWeight() > 150)
+    .collect(Collectors.toList());
+```
+
+**스트림의 마법:**
+1. 라이브러리가 리스트를 자동으로 분할(fork)
+2. 각 CPU 코어에서 병렬로 처리
+3. 결과를 합침(join)
+4. `synchronized` 불필요!
+
+---
+
+### 2. 동작 파라미터화 (Behavior Parameterization)
+
+#### 혁명적 개념: 메서드를 값처럼 전달
+
+**자바 8 이전의 고통:**
+```java
+// 녹색 사과 필터링
+public static List<Apple> filterGreenApples(...) { ... }
+
+// 빨간 사과 필터링
+public static List<Apple> filterRedApples(...) { ... }
+
+// 무거운 사과 필터링
+public static List<Apple> filterHeavyApples(...) { ... }
+
+// ... 조건마다 메서드가 증가!
+```
+
+**자바 8의 해법:**
+```java
+// 하나의 메서드로 모든 조건 처리!
 public static List<Apple> filterApples(List<Apple> inventory, Predicate<Apple> p) {
     List<Apple> result = new ArrayList<>();
     for (Apple apple : inventory) {
-        if (p.test(apple)) {  // 조건 검사
+        if (p.test(apple)) {  // 조건은 p가 결정
             result.add(apple);
         }
     }
@@ -123,21 +173,18 @@ public static List<Apple> filterApples(List<Apple> inventory, Predicate<Apple> p
 }
 
 // 사용
-List<Apple> greenApples = filterApples(inventory, FilteringApples::isGreenApple);
-List<Apple> heavyApples = filterApples(inventory, FilteringApples::isHeavyApple);
+filterApples(inventory, apple -> "green".equals(apple.getColor()));
+filterApples(inventory, apple -> apple.getWeight() > 150);
+filterApples(inventory, apple -> "red".equals(apple.getColor()) && apple.getWeight() > 150);
 ```
 
-#### Predicate란?
+#### Predicate의 비밀
 
-**개념:**
-- 수학: 인수로 값을 받아 true/false를 반환하는 함수
-- 자바 8: `Predicate<T>` 함수형 인터페이스
-
-**구조:**
+**Predicate는 함수형 인터페이스:**
 ```java
 @FunctionalInterface
 public interface Predicate<T> {
-    boolean test(T t);  // 추상 메서드
+    boolean test(T t);  // 유일한 추상 메서드
     
     // default 메서드들
     default Predicate<T> and(Predicate<? super T> other) { ... }
@@ -146,29 +193,29 @@ public interface Predicate<T> {
 }
 ```
 
-**동작 원리:**
+**람다가 Predicate가 되는 과정:**
 ```java
-// 람다 표현식
-Predicate<Apple> p = (Apple a) -> a.getWeight() > 150;
+// 1. 람다 표현식
+Predicate<Apple> p = apple -> apple.getWeight() > 150;
 
-// 컴파일러가 내부적으로 변환
+// 2. 컴파일러가 내부적으로 변환
 Predicate<Apple> p = new Predicate<Apple>() {
     @Override
-    public boolean test(Apple a) {
-        return a.getWeight() > 150;  // 람다 본문이 구현부가 됨!
+    public boolean test(Apple apple) {
+        return apple.getWeight() > 150;  // 람다 본문이 여기로!
     }
 };
 
-// p.test(apple) 호출 시 위의 test() 메서드가 실행됨
+// 3. p.test(myApple) 호출 시 위의 test() 메서드 실행!
 ```
 
 ---
 
-### 2.3 메서드 참조와 람다
+### 3. 메서드 참조와 람다
 
-#### 2.3.1 메서드 참조 (Method Reference)
+#### 메서드 참조 (::)
 
-**기존 방식: 익명 클래스**
+**기존: 익명 클래스의 보일러플레이트**
 ```java
 File[] hiddenFiles = new File(".").listFiles(new FileFilter() {
     public boolean accept(File file) {
@@ -180,94 +227,96 @@ File[] hiddenFiles = new File(".").listFiles(new FileFilter() {
 **자바 8: 메서드 참조**
 ```java
 File[] hiddenFiles = new File(".").listFiles(File::isHidden);
-// :: 연산자: "이 메서드를 값으로 사용하라"
+// :: = "이 메서드를 값으로 사용하라"
 ```
 
-#### 2.3.2 람다 (Lambda)
+#### 람다 표현식
 
 **기본 문법:**
 ```java
-// 형식: (파라미터) -> 표현식
-(Apple a) -> "green".equals(a.getColor())
-(Apple a) -> a.getWeight() > 150
-(int x) -> x + 1
+// (파라미터) -> 표현식
+
+apple -> "green".equals(apple.getColor())
+apple -> apple.getWeight() > 150
+(x, y) -> x + y
+() -> System.out.println("Hello")
 ```
 
-**사용 예시:**
+**메서드 참조 vs 람다 선택 가이드:**
+
 ```java
-// 한 번만 사용할 조건은 람다로 간단히
-filterApples(inventory, (Apple a) -> "green".equals(a.getColor()));
-filterApples(inventory, (Apple a) -> a.getWeight() > 150);
-filterApples(inventory, (Apple a) -> a.getWeight() < 80 || "brown".equals(a.getColor()));
-```
+// ✅ 간단하고 한 번만 사용 → 람다
+filterApples(inventory, apple -> apple.getWeight() > 150);
 
-**언제 메서드 참조 vs 람다?**
-- **람다**: 간단하고 한두 번만 사용하는 경우
-- **메서드 참조**: 재사용되거나, 복잡하거나, 의미를 명확히 표현해야 하는 경우
-```java
-// 복잡한 람다 → 메서드 참조로 개선
-filterApples(inventory, (Apple a) -> {
-        return a.getWeight() > 150 &&
-        "green".equals(a.getColor());
-        });
-
-// ↓ 개선
-
-public static boolean isHeavyGreenApple(Apple apple) {
-    return apple.getWeight() > 150 &&
-            "green".equals(apple.getColor());
+// ✅ 재사용되거나 의미가 명확해야 함 → 메서드 참조
+public static boolean isHeavyApple(Apple apple) {
+    return apple.getWeight() > 150;
 }
+filterApples(inventory, FilteringApples::isHeavyApple);
 
+// ✅ 복잡한 로직 → 메서드로 추출 후 참조
+public static boolean isHeavyGreenApple(Apple apple) {
+    return apple.getWeight() > 150 && "green".equals(apple.getColor());
+}
 filterApples(inventory, FilteringApples::isHeavyGreenApple);
 ```
 
 ---
 
-## 3. 일급 시민 (First-Class Citizen)
+## 💡 일급 시민 (First-Class Citizen)
 
-### 3.1 개념
-- **일급 시민**: 프로그램 실행 중에 자유롭게 전달할 수 있는 값
-- 전통적으로 자바에서는 기본값(int, double)과 객체만 일급 시민
+### 개념
 
-### 3.2 자바 8의 변화
+**일급 시민:** 프로그램 실행 중에 자유롭게 전달할 수 있는 값
+
+```
+전통적 자바
+├─ 일급 시민: int, double, String, 객체
+└─ 이급 시민: 메서드, 클래스 (값으로 전달 불가)
+
+자바 8
+├─ 일급 시민: int, double, String, 객체, 메서드, 람다
+└─ (메서드가 일급 시민으로 승격!)
+```
+
+### 메서드가 일급 시민이 되면?
+
 ```java
-// 자바 8 이전: 메서드는 이급 시민
-// - 값으로 전달 불가
-// - 변수에 할당 불가
+// 변수에 할당 가능
+Predicate<Apple> isGreen = FilteringApples::isGreenApple;
 
-// 자바 8 이후: 메서드와 람다가 일급 시민
-// - 메서드를 값으로 전달 가능
-Predicate<Apple> p = FilteringApples::isGreenApple;
+// 파라미터로 전달 가능
+filterApples(inventory, FilteringApples::isGreenApple);
 
-// - 변수에 할당 가능
+// 반환값으로 사용 가능
+public Predicate<Apple> createPredicate() {
+    return FilteringApples::isGreenApple;
+}
+
+// Comparator를 변수에 저장
 Comparator<Apple> byWeight = Comparator.comparing(Apple::getWeight);
-
-// - 메서드의 인수로 전달 가능
-inventory.sort(Comparator.comparing(Apple::getWeight));
+inventory.sort(byWeight);
+inventory.sort(byWeight.reversed());
 ```
 
 ---
 
-## 4. 디폴트 메서드 (Default Method)
+## 🔧 디폴트 메서드 (Default Method)
 
-### 4.1 왜 필요한가?
+### 문제 상황
 
-**문제 상황:**
 ```java
 // List 인터페이스에 sort()를 추가하고 싶다면?
 public interface List<E> {
-    void sort(Comparator<? super E> c);  // 새 메서드 추가
+    void sort(Comparator<? super E> c);  // 새 메서드
 }
 
 // ❌ 모든 List 구현체가 깨짐!
-public class ArrayList<E> implements List<E> {
-    // sort()를 구현하지 않으면 컴파일 에러!
-}
-
-// 전 세계의 모든 커스텀 List 구현체도 깨짐
+// ArrayList, LinkedList, 전 세계의 커스텀 List...
 ```
 
-**해결책: default 메서드**
+### 해결책: default 메서드
+
 ```java
 public interface List<E> {
     // default 메서드: 인터페이스에 구현이 있음!
@@ -282,190 +331,304 @@ public interface List<E> {
     }
 }
 
-// ✅ 기존 구현체들은 아무 수정 없이도 sort() 사용 가능!
+// ✅ 기존 구현체들은 수정 없이 sort() 사용 가능!
 ```
 
-### 4.2 이론 vs 현실
+### 이론 vs 현실
 
-**이론적으로 올바른 설계:**
 ```java
-list.sort(comparator);  // 리스트가 자기 자신을 정렬
-list.add(element);
-list.remove(index);
-// 모든 동작이 list 객체가 수행 → 객체지향적
-```
+// 이론적으로 올바른 설계
+list.sort(comparator);  // 객체지향적!
 
-**자바 7까지의 현실:**
-```java
-Collections.sort(list, comparator);  // 외부 유틸리티 클래스 사용
-list.add(element);
-list.remove(index);
-// 정렬만 외부에 의존 → 비객체지향적
-```
+// 자바 7까지의 현실
+Collections.sort(list, comparator);  // 유틸리티 클래스에 의존
 
-**자바 8 이후:**
-```java
+// 자바 8 이후
 list.sort(comparator);  // 드디어 이론대로!
-list.add(element);
-list.remove(index);
 ```
 
-### 4.3 와일드카드 이해하기
+### 와일드카드 이해하기
+
 ```java
-default void sort(Comparator<? super E> c) { ... }
+default void sort(Comparator<? super E> c)
 //                          ^^^^^^^^
-//                          상위 타입 허용
+//                          E의 상위 타입 허용
 ```
 
-**왜 `? super E`인가?**
+**왜 `? super E`?**
 ```java
 class Fruit { }
 class Apple extends Fruit { }
 
-// Apple 리스트
 List<Apple> apples = new ArrayList<>();
-
-// Fruit Comparator (상위 타입)
-Comparator<Fruit> fruitComparator = ...;
+Comparator<Fruit> fruitComp = ...;
 
 // ✅ Apple 리스트를 Fruit Comparator로 정렬 가능!
-apples.sort(fruitComparator);
-// Apple은 Fruit이므로 안전!
-```
-
-**제네릭 와일드카드 정리:**
-```java
-// 1. <T> - 정확히 T 타입
-List<Apple> apples;
-
-// 2. <? extends T> - T 또는 T의 하위 타입 (상한 제한)
-List<? extends Fruit> fruits;  // Apple, Orange 등 가능
-
-// 3. <? super T> - T 또는 T의 상위 타입 (하한 제한)
-Comparator<? super Apple> comp;  // Apple, Fruit, Object 가능
+apples.sort(fruitComp);  // Apple은 Fruit이므로 안전
 ```
 
 ---
 
-## 5. 병렬성과 함수형 프로그래밍
+## 🔥 병렬성과 함수형 프로그래밍
 
-### 5.1 공유 가변 상태의 문제
+### 공유 가변 상태의 위험
+
 ```java
-// 위험한 코드: 공유 가변 상태
+// ❌ 위험: 공유 가변 상태
 List<Apple> result = new ArrayList<>();
 inventory.parallelStream()
     .filter(a -> a.getWeight() > 150)
-    .forEach(a -> result.add(a));  // ❌ 여러 스레드가 동시에 접근!
+    .forEach(a -> result.add(a));  // 여러 스레드가 동시 접근!
+
+// 💥 결과:
+// - ArrayIndexOutOfBoundsException
+// - 누락된 데이터
+// - 예측 불가능한 동작
 ```
 
-### 5.2 안전한 병렬 처리
+### 안전한 병렬 처리
+
 ```java
-// 안전한 코드: 불변 방식
+// ✅ 안전: 불변 방식
 List<Apple> result = inventory.parallelStream()
     .filter(a -> a.getWeight() > 150)
-    .collect(Collectors.toList());  // ✅ 스레드 안전
+    .collect(Collectors.toList());  // 스레드 안전!
 ```
 
-### 5.3 함수형 프로그래밍의 핵심
+### 함수형 프로그래밍의 핵심 원칙
 
-1. **함수를 일급값으로 사용**
-2. **공유 가변 상태 없음**
-    - 메서드가 부작용(side-effect) 없음
-    - 같은 입력에 항상 같은 출력
-    - 다른 메서드/스레드와 상호작용 없음
+1. **순수 함수 (Pure Function)**
 ```java
-// 함수형: 부작용 없음
+// ✅ 순수 함수: 같은 입력 → 항상 같은 출력
 public static boolean isHeavy(Apple apple) {
-    return apple.getWeight() > 150;  // 입력만 보고 판단
+    return apple.getWeight() > 150;  // 외부 상태 의존 없음
 }
 
-// 비함수형: 부작용 있음
+// ❌ 비순수 함수: 외부 상태에 의존
 int threshold = 150;
 public static boolean isHeavy(Apple apple) {
-    return apple.getWeight() > threshold;  // 외부 상태에 의존
+    return apple.getWeight() > threshold;  // threshold 변경 시 결과 달라짐
 }
+```
+
+2. **부작용 없음 (No Side Effects)**
+```java
+// ✅ 부작용 없음
+public static int add(int a, int b) {
+    return a + b;  // 계산만 수행
+}
+
+// ❌ 부작용 있음
+public static int addAndLog(int a, int b) {
+    System.out.println("Adding...");  // 외부 상태 변경 (출력)
+    return a + b;
+}
+```
+
+3. **불변성 (Immutability)**
+```java
+// ✅ 불변 방식
+List<Apple> filtered = inventory.stream()
+    .filter(a -> a.getWeight() > 150)
+    .collect(Collectors.toList());  // 새 리스트 생성
+
+// ❌ 가변 방식
+inventory.removeIf(a -> a.getWeight() <= 150);  // 원본 수정
 ```
 
 ---
 
-## 6. 기타 함수형 프로그래밍 아이디어
+## 🎁 기타 함수형 프로그래밍 아이디어
 
-### 6.1 Optional - NPE 회피
+### Optional - NPE 회피
+
 ```java
-// 자바 8 이전
+// ❌ 자바 8 이전
 String name = getAppleName();
 if (name != null) {
     System.out.println(name.toUpperCase());
 }
 
-// 자바 8: Optional
+// ✅ 자바 8: Optional
 Optional<String> name = getAppleName();
 name.ifPresent(n -> System.out.println(n.toUpperCase()));
-```
 
-### 6.2 패턴 매칭 (제안 단계)
-- switch를 확장한 형태
-- 데이터 형식 분류와 분석을 동시에 수행
-- 자바 8에서는 완벽히 제공하지 않음
+// 더 강력한 활용
+String result = getAppleName()
+    .map(String::toUpperCase)
+    .orElse("NO NAME");
+```
 
 ---
 
-## 7. 핵심 정리
+## 📊 자바 8 변화 요약
 
-### 자바 8의 변화 요약
+| 항목 | 자바 7 | 자바 8 | 개선점 |
+|------|--------|--------|--------|
+| **병렬 처리** | Thread, synchronized 등 복잡 | `parallelStream()` | 한 줄로 병렬화 |
+| **코드 재사용** | 복사-붙여넣기 | 동작 파라미터화 | DRY 원칙 준수 |
+| **메서드 전달** | 익명 클래스 (장황) | 람다, 메서드 참조 | 간결함 |
+| **인터페이스 진화** | 불가능 | default 메서드 | 하위 호환성 |
+| **정렬** | `Collections.sort(list)` | `list.sort()` | 객체지향적 |
+| **null 처리** | if-null 체크 | Optional | 안전성 |
 
-| 항목 | 자바 8 이전 | 자바 8 이후 |
-|------|------------|------------|
-| **병렬 처리** | 복잡한 멀티스레드 코드 | `parallelStream()` 한 줄 |
-| **코드 재사용** | 복사-붙여넣기 | 동작 파라미터화 |
-| **메서드 전달** | 익명 클래스 (장황함) | 람다, 메서드 참조 (간결함) |
-| **인터페이스 진화** | 불가능 (구현체 모두 수정) | default 메서드로 가능 |
-| **정렬** | `Collections.sort(list)` | `list.sort()` |
+---
 
-### 함수형 프로그래밍의 핵심
+## 💻 실전 가이드
 
-1. **일급 함수**: 메서드와 람다를 값처럼 사용
-2. **불변성**: 공유 가변 상태 없음
-3. **병렬성**: 안전한 병렬 처리
-4. **간결성**: 더 적은 코드로 더 많은 표현
+### Before & After
 
-### 실무 적용 가이드
 ```java
-// ❌ 피해야 할 패턴
+// ❌ 자바 7 스타일
+List<Apple> heavyApples = new ArrayList<>();
 for (Apple apple : inventory) {
     if (apple.getWeight() > 150) {
-        result.add(apple);
+        heavyApples.add(apple);
     }
 }
+Collections.sort(heavyApples, new Comparator<Apple>() {
+    public int compare(Apple a1, Apple a2) {
+        return Integer.compare(a1.getWeight(), a2.getWeight());
+    }
+});
 
-// ✅ 권장 패턴
-List<Apple> result = inventory.stream()
+// ✅ 자바 8 스타일
+List<Apple> heavyApples = inventory.stream()
     .filter(apple -> apple.getWeight() > 150)
+    .sorted(Comparator.comparing(Apple::getWeight))
     .collect(Collectors.toList());
+```
 
-// ✅ 병렬 처리가 필요한 경우
-List<Apple> result = inventory.parallelStream()
-    .filter(apple -> apple.getWeight() > 150)
+### 스트림 API 파이프라인
+
+```java
+// 데이터 처리 파이프라인
+List<String> result = inventory.stream()
+    .filter(apple -> "green".equals(apple.getColor()))  // 필터링
+    .sorted(Comparator.comparing(Apple::getWeight))      // 정렬
+    .map(Apple::toString)                                 // 변환
+    .limit(3)                                             // 제한
+    .collect(Collectors.toList());                        // 수집
+
+// 병렬 처리
+List<String> parallel = inventory.parallelStream()  // 병렬!
+    .filter(apple -> "green".equals(apple.getColor()))
+    .sorted(Comparator.comparing(Apple::getWeight))
+    .map(Apple::toString)
+    .limit(3)
     .collect(Collectors.toList());
 ```
 
 ---
 
-## 8. 다음 단계
+## 📂 학습 자료 구조
 
-- **Chapter 2**: 동작 파라미터화 자세히
-- **Chapter 3**: 람다 표현식
-- **Chapter 4-7**: 스트림 API
-- **Chapter 9**: 디폴트 메서드
-- **Chapter 18-19**: 함수형 프로그래밍
+```
+chapter01/
+├── README.md                      # 👈 현재 문서
+├── code/                          # 실습 코드
+│   ├── FilteringApples.java       # 동작 파라미터화
+│   ├── MethodReferenceExample.java# 메서드 참조
+│   ├── StreamExample.java         # 스트림 API
+│   ├── ParallelStreamExample.java # 병렬 스트림
+│   └── DefaultMethodExample.java  # 디폴트 메서드
+└── advanced/                      # 심화 학습
+    ├── deep-dive.md               # 상세 원리 설명
+    ├── cheatsheet.md              # 빠른 참조 가이드
+    └── qa-sessions.md             # AI와의 Q&A 세션
+```
 
 ---
 
-**🎯 Chapter 1 핵심 메시지**
+## 🎯 핵심 메시지
 
-자바 8은 단순한 기능 추가가 아니라 **프로그래밍 패러다임의 전환**입니다.
-- 명령형 → 선언형
-- 순차적 → 병렬적
-- 복잡함 → 간결함
+### 자바 8의 본질
 
-이 변화를 이해하고 활용하면, 더 빠르고 안전하며 유지보수하기 쉬운 코드를 작성할 수 있습니다.
+```
+자바 8 = 패러다임의 전환
+
+명령형 (How) → 선언형 (What)
+순차적 → 병렬적
+복잡함 → 간결함
+```
+
+### 3대 핵심 기술이 만나는 지점
+
+```
+스트림 API
+    ↓
+동작 파라미터화 (람다/메서드 참조로 동작 전달)
+    ↓
+병렬 처리 (멀티코어 활용)
+    ↓
+함수형 프로그래밍 (순수 함수, 불변성)
+```
+
+---
+
+## ✅ 학습 체크리스트
+
+### 기본 이해
+- [ ] 스트림 API의 개념을 설명할 수 있다
+- [ ] 외부 반복과 내부 반복의 차이를 안다
+- [ ] 동작 파라미터화가 무엇인지 설명할 수 있다
+- [ ] Predicate가 무엇인지 이해한다
+- [ ] 람다와 메서드 참조를 구분할 수 있다
+
+### 실전 활용
+- [ ] `stream()`과 `parallelStream()`을 사용할 수 있다
+- [ ] Predicate로 필터링 로직을 작성할 수 있다
+- [ ] 메서드 참조를 적절히 사용할 수 있다
+- [ ] Comparator로 정렬을 구현할 수 있다
+- [ ] 디폴트 메서드의 필요성을 이해한다
+
+### 심화 이해
+- [ ] 함수형 프로그래밍의 3가지 원칙을 설명할 수 있다
+- [ ] 공유 가변 상태의 위험성을 이해한다
+- [ ] 순수 함수와 부작용의 개념을 안다
+- [ ] Optional의 사용법을 안다
+- [ ] 일급 시민의 개념을 이해한다
+
+---
+
+## 📖 더 알아보기
+
+- [Deep Dive](advanced/deep-dive.md) - 내부 동작 원리와 설계 철학
+- [CheatSheet](advanced/cheatsheet.md) - 빠른 참조 가이드
+- [Q&A Sessions](advanced/qa-sessions.md) - AI와의 대화 기록
+
+---
+
+## 🚀 다음 단계
+
+**Chapter 2: 동작 파라미터화**에서는:
+- Predicate 패턴을 깊이 있게 학습
+- Consumer, Function 등 다른 함수형 인터페이스
+- Comparator의 고급 활용
+- 전략 패턴과의 관계
+
+**Chapter 3: 람다 표현식**에서는:
+- 람다 문법의 모든 것
+- 함수형 인터페이스 설계
+- 메서드 참조의 4가지 형태
+- 타입 추론과 클로저
+
+**Chapter 4-7: 스트림 API**에서는:
+- 스트림 연산의 종류
+- 중간 연산과 최종 연산
+- 병렬 스트림의 성능
+- 커스텀 컬렉터
+
+---
+
+<div align="center">
+
+**💡 최종 통찰**
+
+> *"자바 8은 단순한 기능 추가가 아니라  
+> 프로그래밍 사고방식의 근본적 변화다."*
+
+**🌟 이 변화를 이해하고 활용하면,  
+더 빠르고, 안전하며, 유지보수하기 쉬운 코드를 작성할 수 있습니다.**
+
+</div>
