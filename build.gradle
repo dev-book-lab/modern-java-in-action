@@ -30,9 +30,7 @@ test {
 sourceSets {
     main {
         java {
-            srcDirs = ['chapters/chapter01/examples',
-                       'chapters/chapter02/examples',
-                       'chapters/chapter03/examples']
+            srcDirs = ['chapters']
         }
     }
 }
