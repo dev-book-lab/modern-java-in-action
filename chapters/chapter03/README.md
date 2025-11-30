@@ -1,62 +1,98 @@
 # Chapter 03. 람다 표현식
 
-> **핵심 주제**: 메서드를 인수로 전달하는 자바 8의 새로운 기능, 람다 표현식
+<div align="center">
+
+**"메서드를 값처럼 전달하는 자바 8의 혁신"**
+
+> *익명 함수를 단순하게 표현하여 동작 파라미터화를 더 쉽게*
+
+[📖 Deep Dive](advanced/deep-dive.md) | [💻 Code](code/) | [📋 CheatSheet](advanced/cheatsheet.md) | [💬 Q&A](advanced/qa-sessions.md)
+
+</div>
 
 ---
 
-## 📚 학습 목표
+## 🎯 학습 목표
 
 이 챕터를 마치면 다음을 할 수 있습니다:
 
-- ✅ 람다 표현식이 무엇인지 이해한다
-- ✅ 함수형 인터페이스를 사용하여 람다를 활용한다
-- ✅ 실행 어라운드 패턴으로 코드를 개선한다
-- ✅ java.util.function의 주요 함수형 인터페이스를 사용한다
-- ✅ 형식 검사, 형식 추론, 제약을 이해한다
-- ✅ 메서드 참조로 람다를 간결하게 표현한다
-- ✅ 람다 표현식을 조합하여 복잡한 동작을 만든다
+- [ ] **람다 표현식**의 개념과 문법을 이해한다
+- [ ] **함수형 인터페이스**를 사용하여 람다를 활용한다
+- [ ] **실행 어라운드 패턴**으로 코드를 개선한다
+- [ ] **Predicate, Consumer, Function**을 실전에서 사용한다
+- [ ] **형식 검사, 형식 추론, 제약**을 이해한다
+- [ ] **메서드 참조** 4가지 유형을 구분하고 사용한다
+- [ ] **람다 조합**으로 복잡한 동작을 만든다
 
 ---
 
-## 🎯 핵심 개념
+## 📚 핵심 개념
 
 ### 람다란?
 
-**람다 표현식 = 메서드로 전달할 수 있는 익명 함수를 단순화한 것**
+**람다 표현식(Lambda Expression)** 은 메서드로 전달할 수 있는 익명 함수를 단순화한 것입니다.
 
 ```java
-// Before: 익명 클래스
+// Before: 익명 클래스 (5줄)
 Comparator<Apple> byWeight = new Comparator<Apple>() {
     public int compare(Apple a1, Apple a2) {
         return a1.getWeight().compareTo(a2.getWeight());
     }
 };
 
-// After: 람다 표현식
+// After: 람다 표현식 (1줄!)
 Comparator<Apple> byWeight = 
     (Apple a1, Apple a2) -> a1.getWeight().compareTo(a2.getWeight());
 ```
 
-**람다의 4가지 특징:**
+### 람다의 4가지 특징
 
-1. **익명 (Anonymous)**: 이름이 없다
-2. **함수 (Function)**: 클래스에 종속되지 않는다
-3. **전달 (Passed)**: 메서드 인수나 변수로 전달 가능
-4. **간결 (Concise)**: 자질구레한 코드가 줄어든다
+1. **익명 (Anonymous)**: 보통의 메서드와 달리 이름이 없다
+2. **함수 (Function)**: 특정 클래스에 종속되지 않는다
+3. **전달 (Passed)**: 메서드 인수로 전달하거나 변수로 저장할 수 있다
+4. **간결 (Concise)**: 익명 클래스처럼 자질구레한 코드가 없다
+
+### 왜 필요한가?
+
+Chapter 02에서 배운 **동작 파라미터화**를 훨씬 간결하게 만들어줍니다:
+
+```java
+// Chapter 02: 익명 클래스 사용
+filterApples(inventory, new ApplePredicate() {
+    public boolean test(Apple apple) {
+        return apple.getColor() == Color.GREEN;
+    }
+});
+
+// Chapter 03: 람다 사용 - 훨씬 간결!
+filterApples(inventory, apple -> apple.getColor() == Color.GREEN);
+```
 
 ---
 
-### 람다 문법
+## 🔤 람다 문법
+
+### 기본 형태
 
 ```java
-// 기본 형태
 (파라미터) -> 표현식
-
-// 블록 형태
 (파라미터) -> { 문장들; }
 ```
 
-**예시:**
+### 람다 구조
+
+```
+(Apple a1, Apple a2) -> a1.getWeight().compareTo(a2.getWeight())
+ ^^^^^^^^^^^^^^^^      ^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 파라미터 리스트      화살표          람다 바디
+```
+
+**구성 요소:**
+- **파라미터 리스트**: Comparator의 compare 메서드 파라미터
+- **화살표 (->)**: 파라미터와 바디를 구분
+- **람다 바디**: 람다의 반환값
+
+### 다양한 형태
 
 ```java
 // 1. 파라미터 없음, 상수 반환
@@ -73,66 +109,47 @@ Comparator<Apple> byWeight =
     System.out.println("합계 계산");
     return x + y;
 }
+
+// 5. 파라미터 타입 생략 (형식 추론)
+(a1, a2) -> a1.getWeight().compareTo(a2.getWeight())
 ```
 
 ---
 
-## 🔑 핵심 내용
-
-### 3.1 람다란 무엇인가?
-
-**람다 구조:**
-```
-(Apple a1, Apple a2) -> a1.getWeight().compareTo(a2.getWeight())
- ^^^^^^^^^^^^^^^^      ^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- 파라미터 리스트      화살표          람다 바디
-```
-
-**구성 요소:**
-- **파라미터 리스트**: 메서드의 파라미터
-- **화살표 (->)**: 파라미터와 바디 구분
-- **람다 바디**: 람다의 반환값
-
----
+## 🚀 주요 개념
 
 ### 3.2 함수형 인터페이스
 
-**정의:** 정확히 하나의 추상 메서드를 지정하는 인터페이스
+**정의:** 정확히 **하나의 추상 메서드**를 지정하는 인터페이스
 
 ```java
 @FunctionalInterface
 public interface Predicate<T> {
-    boolean test(T t);  // 추상 메서드 (단 하나!)
+    boolean test(T t);  // 추상 메서드 (딱 하나!)
 }
 ```
 
-**함수 디스크립터:**
+**함수 디스크립터 (Function Descriptor):**
 - 함수형 인터페이스의 추상 메서드 시그니처
 - 람다 표현식의 시그니처를 서술
 
-```java
-Runnable: () -> void
-Predicate<T>: (T) -> boolean
-Comparator<T>: (T, T) -> int
-```
-
 ---
 
-### 3.3 실행 어라운드 패턴
+### 3.3 실행 어라운드 패턴 (Execute Around Pattern)
 
-**패턴:**
+**패턴 구조:**
 ```
 초기화/준비 코드
     ↓
-실제 작업 (변경 가능)
+실제 작업 (람다로 전달) ← 변경 가능!
     ↓
 정리/마무리 코드
 ```
 
-**예시: 파일 읽기**
+**4단계 진화:**
 
 ```java
-// 1단계: 동작 파라미터화
+// 1단계: 동작 파라미터화 필요성 파악
 String result = processFile((BufferedReader br) -> br.readLine());
 
 // 2단계: 함수형 인터페이스 정의
@@ -149,99 +166,90 @@ public String processFile(BufferedReaderProcessor p) throws IOException {
 }
 
 // 4단계: 람다 전달
-String oneLine = processFile((BufferedReader br) -> br.readLine());
-String twoLines = processFile((BufferedReader br) -> 
-    br.readLine() + br.readLine());
+String oneLine = processFile(br -> br.readLine());
+String twoLines = processFile(br -> br.readLine() + br.readLine());
 ```
+
+[→ ExecuteAroundPattern.java 전체 코드 보기](code/ExecuteAroundPattern.java)
 
 ---
 
-### 3.4 함수형 인터페이스 사용
+### 3.4 java.util.function 패키지
 
-#### 3.4.1 Predicate<T>
+**핵심 함수형 인터페이스 6개:**
 
-**시그니처:** `(T) -> boolean`
+| 인터페이스 | 함수 디스크립터 | 사용 예시 |
+|-----------|----------------|----------|
+| `Predicate<T>` | `T → boolean` | `a -> a.getWeight() > 150` |
+| `Consumer<T>` | `T → void` | `a -> System.out.println(a)` |
+| `Function<T,R>` | `T → R` | `a -> a.getWeight()` |
+| `Supplier<T>` | `() → T` | `() -> new Apple()` |
+| `UnaryOperator<T>` | `T → T` | `s -> s.toUpperCase()` |
+| `BinaryOperator<T>` | `(T,T) → T` | `(a,b) -> a + b` |
+
+#### Predicate<T> - 조건 검사
 
 ```java
-@FunctionalInterface
-public interface Predicate<T> {
-    boolean test(T t);
-}
-
-// 사용
-Predicate<String> nonEmpty = (String s) -> !s.isEmpty();
-List<String> nonEmptyStrings = filter(strings, nonEmpty);
+Predicate<String> nonEmpty = s -> !s.isEmpty();
+List<String> result = filter(strings, nonEmpty);
 ```
 
----
-
-#### 3.4.2 Consumer<T>
-
-**시그니처:** `(T) -> void`
+#### Consumer<T> - 값 소비
 
 ```java
-@FunctionalInterface
-public interface Consumer<T> {
-    void accept(T t);
-}
-
-// 사용
 forEach(Arrays.asList(1,2,3,4,5), 
-    (Integer i) -> System.out.println(i));
+    i -> System.out.println(i));
 ```
 
----
-
-#### 3.4.3 Function<T, R>
-
-**시그니처:** `(T) -> R`
+#### Function<T,R> - 값 변환
 
 ```java
-@FunctionalInterface
-public interface Function<T, R> {
-    R apply(T t);
-}
-
-// 사용
 List<Integer> lengths = map(
     Arrays.asList("Modern", "Java", "In", "Action"),
-    (String s) -> s.length()
+    s -> s.length()
 );
 ```
 
+[→ FunctionalInterfaceExamples.java 전체 코드 보기](code/FunctionalInterfaceExamples.java)
+
 ---
 
-#### 3.4.4 기본형 특화
+### 3.4.4 기본형 특화 (Primitive Specialization)
 
-**문제:** 제네릭은 참조형만 사용 가능 → 박싱 비용
-
-**해결:** 기본형 특화 함수형 인터페이스
+**문제:** 제네릭은 참조형만 사용 → 오토박싱 비용 발생
 
 ```java
-// 박싱 발생 (느림)
-Predicate<Integer> evenNumbers = (Integer i) -> i % 2 == 0;
+// ❌ 박싱 발생 (느림)
+Predicate<Integer> evenNumbers = i -> i % 2 == 0;
 
-// 박싱 없음 (빠름)
-IntPredicate evenNumbers = (int i) -> i % 2 == 0;
+// ✅ 박싱 없음 (빠름, 약 7배!)
+IntPredicate evenNumbers = i -> i % 2 == 0;
 ```
+
+**성능 차이:**
+- `Function<Double, Double>`: 박싱 4번 → 850ms
+- `DoubleFunction<Double>`: 박싱 1번 → 380ms
+- `DoubleUnaryOperator`: 박싱 0번 → 120ms
 
 **주요 기본형 특화 인터페이스:**
 
 | 인터페이스 | 함수 디스크립터 | 예시 |
 |-----------|----------------|------|
-| `IntPredicate` | `int -> boolean` | `i -> i > 0` |
-| `LongConsumer` | `long -> void` | `l -> System.out.println(l)` |
-| `DoubleFunction<R>` | `double -> R` | `d -> Double.toString(d)` |
-| `IntUnaryOperator` | `int -> int` | `i -> i * i` |
-| `DoubleBinaryOperator` | `(double, double) -> double` | `(d1, d2) -> d1 + d2` |
+| `IntPredicate` | `int → boolean` | `i -> i > 0` |
+| `LongConsumer` | `long → void` | `l -> System.out.println(l)` |
+| `DoubleFunction<R>` | `double → R` | `d -> Double.toString(d)` |
+| `IntUnaryOperator` | `int → int` | `i -> i * i` |
+| `DoubleBinaryOperator` | `(double,double) → double` | `(d1,d2) -> d1 + d2` |
+
+[→ deep-dive.md에서 박싱 성능 분석 보기](advanced/deep-dive.md#8-박싱과-기본형-특화)
 
 ---
 
 ### 3.5 형식 검사, 형식 추론, 제약
 
-#### 3.5.1 형식 검사
+#### 3.5.1 형식 검사 (Type Checking)
 
-**람다의 형식 = 대상 형식 (target type)**
+**람다의 형식 = 대상 형식 (Target Type)**
 
 ```java
 List<Apple> heavyApples = 
@@ -250,22 +258,20 @@ List<Apple> heavyApples =
 
 **형식 검사 과정:**
 ```
-1. filter 메서드 확인
-   ↓
-2. 두 번째 파라미터 타입 확인: Predicate<Apple>
-   ↓
-3. Predicate<Apple>의 추상 메서드: test(Apple) -> boolean
-   ↓
-4. 람다 시그니처 확인: (Apple) -> boolean
-   ↓
-5. 일치! ✅
+1. filter 메서드의 시그니처 확인
+   → filter(List<Apple>, Predicate<Apple>)
+2. Predicate<Apple>의 추상 메서드 확인
+   → boolean test(Apple)
+3. 람다 시그니처 확인
+   → (Apple) -> boolean
+4. 일치! ✅
 ```
 
 ---
 
-#### 3.5.2 형식 추론
+#### 3.5.2 형식 추론 (Type Inference)
 
-**컴파일러가 대상 형식으로 람다 파라미터 타입 추론**
+**컴파일러가 대상 형식으로 파라미터 타입 추론**
 
 ```java
 // 형식 명시
@@ -291,36 +297,32 @@ Runnable r = () -> System.out.println(portNumber);
 // ❌ 컴파일 에러
 int portNumber = 1337;
 Runnable r = () -> System.out.println(portNumber);
-portNumber = 31337;  // 재할당!
+portNumber = 31337;  // 재할당 불가!
 ```
 
 **이유:**
-```
-지역 변수: Stack에 저장
-    ↓
-람다: 변수의 복사본 캡처
-    ↓
-원본이 변경되면 복사본과 불일치
-    ↓
-final만 허용하여 일관성 보장
-```
+- 지역 변수는 Stack에 저장
+- 람다는 변수의 복사본을 캡처
+- 원본이 변경되면 복사본과 불일치
+- final만 허용하여 일관성 보장
+
+[→ deep-dive.md에서 메모리 분석 보기](advanced/deep-dive.md#3-람다의-지역변수-참조-제약)
 
 ---
 
-### 3.6 메서드 참조
+### 3.6 메서드 참조 (Method Reference)
 
 **람다를 더 간결하게!**
 
 ```java
 // 람다
-inventory.sort((Apple a1, Apple a2) -> 
-    a1.getWeight().compareTo(a2.getWeight()));
+inventory.sort((a1, a2) -> a1.getWeight().compareTo(a2.getWeight()));
 
 // 메서드 참조
 inventory.sort(comparing(Apple::getWeight));
 ```
 
-#### 3.6.1 메서드 참조 유형
+#### 메서드 참조 4가지 유형
 
 **1. 정적 메서드 참조**
 ```java
@@ -334,6 +336,10 @@ Integer::parseInt
 (String s) -> s.toUpperCase()
     ↓
 String::toUpperCase
+
+(list, element) -> list.contains(element)
+    ↓
+List::contains  // 첫 번째 파라미터가 대상!
 ```
 
 **3. 인스턴스 메서드 참조 (기존 객체)**
@@ -343,36 +349,23 @@ String::toUpperCase
 expensiveTransaction::getValue
 ```
 
----
-
-#### 3.6.2 생성자 참조
-
+**4. 생성자 참조**
 ```java
-// 인수 없는 생성자
-Supplier<Apple> c1 = () -> new Apple();
-    ↓
-Supplier<Apple> c1 = Apple::new;
-
-// 인수 하나
-Function<Integer, Apple> c2 = (weight) -> new Apple(weight);
-    ↓
-Function<Integer, Apple> c2 = Apple::new;
-
-// 인수 두 개
-BiFunction<Color, Integer, Apple> c3 = 
-    (color, weight) -> new Apple(color, weight);
-    ↓
-BiFunction<Color, Integer, Apple> c3 = Apple::new;
+() -> new Apple()                          → Apple::new
+(weight) -> new Apple(weight)              → Apple::new
+(color, weight) -> new Apple(color, weight) → Apple::new
 ```
 
+[→ MethodReferenceExamples.java 전체 코드 보기](code/MethodReferenceExamples.java)
+
 ---
 
-### 3.7 람다, 메서드 참조 활용
+### 3.7 람다 활용: 코드의 진화
 
-**진화 과정:**
+**6단계 진화 과정:**
 
 ```java
-// 1단계: 코드 전달
+// 1단계: Comparator 구현 클래스
 inventory.sort(new AppleComparator());
 
 // 2단계: 익명 클래스
@@ -382,17 +375,22 @@ inventory.sort(new Comparator<Apple>() {
     }
 });
 
-// 3단계: 람다
+// 3단계: 람다 (타입 명시)
 inventory.sort((Apple a1, Apple a2) -> 
     a1.getWeight().compareTo(a2.getWeight()));
 
-// 3-1단계: 형식 추론
+// 4단계: 람다 (타입 추론)
 inventory.sort((a1, a2) -> 
     a1.getWeight().compareTo(a2.getWeight()));
 
-// 4단계: 메서드 참조
+// 5단계: Comparator.comparing 사용
+inventory.sort(comparing(a -> a.getWeight()));
+
+// 6단계: 메서드 참조 (최종!)
 inventory.sort(comparing(Apple::getWeight));
 ```
+
+[→ SortingEvolution.java 전체 코드 보기](code/SortingEvolution.java)
 
 ---
 
@@ -407,7 +405,7 @@ inventory.sort(comparing(Apple::getWeight).reversed());
 // Comparator 연결
 inventory.sort(comparing(Apple::getWeight)
     .reversed()
-    .thenComparing(Apple::getCountry));
+    .thenComparing(Apple::getColor));
 ```
 
 ---
@@ -424,11 +422,12 @@ Predicate<Apple> notRed = redApple.negate();
 Predicate<Apple> redAndHeavy = 
     redApple.and(a -> a.getWeight() > 150);
 
-// OR
+// OR - 왼쪽부터 오른쪽으로 결합
 Predicate<Apple> redAndHeavyOrGreen = 
     redApple
         .and(a -> a.getWeight() > 150)
         .or(a -> Color.GREEN.equals(a.getColor()));
+// → (빨강 AND 무거움) OR 초록
 ```
 
 ---
@@ -448,29 +447,40 @@ Function<Integer, Integer> h = f.compose(g);
 h.apply(1);  // (1 * 2) + 1 = 3
 ```
 
+**시각화:**
+```
+andThen: 입력 → [f] → [g] → 출력
+compose: 입력 → [g] → [f] → 출력
+```
+
+[→ LambdaComposition.java 전체 코드 보기](code/LambdaComposition.java)  
+[→ deep-dive.md에서 andThen vs compose 상세 비교](advanced/deep-dive.md#7-function의-andthen-vs-compose)
+
 ---
 
 ## 📊 함수형 인터페이스 치트시트
 
-### java.util.function 주요 인터페이스
+### java.util.function 전체 목록
 
 | 인터페이스 | 함수 디스크립터 | 추상 메서드 | 사용 예시 |
 |-----------|----------------|-----------|----------|
-| `Predicate<T>` | `T -> boolean` | `boolean test(T t)` | 필터링 |
-| `Consumer<T>` | `T -> void` | `void accept(T t)` | 출력, 저장 |
-| `Function<T,R>` | `T -> R` | `R apply(T t)` | 변환, 매핑 |
-| `Supplier<T>` | `() -> T` | `T get()` | 팩토리 |
-| `UnaryOperator<T>` | `T -> T` | `T apply(T t)` | 단항 연산 |
-| `BinaryOperator<T>` | `(T,T) -> T` | `T apply(T t1, T t2)` | 이항 연산 |
-| `BiPredicate<T,U>` | `(T,U) -> boolean` | `boolean test(T t, U u)` | 두 값 비교 |
-| `BiConsumer<T,U>` | `(T,U) -> void` | `void accept(T t, U u)` | 두 값 처리 |
-| `BiFunction<T,U,R>` | `(T,U) -> R` | `R apply(T t, U u)` | 두 값 변환 |
+| `Predicate<T>` | `T → boolean` | `boolean test(T t)` | 필터링 |
+| `Consumer<T>` | `T → void` | `void accept(T t)` | 출력, 저장 |
+| `Function<T,R>` | `T → R` | `R apply(T t)` | 변환, 매핑 |
+| `Supplier<T>` | `() → T` | `T get()` | 팩토리 |
+| `UnaryOperator<T>` | `T → T` | `T apply(T t)` | 단항 연산 |
+| `BinaryOperator<T>` | `(T,T) → T` | `T apply(T t1, T t2)` | 이항 연산 |
+| `BiPredicate<T,U>` | `(T,U) → boolean` | `boolean test(T t, U u)` | 두 값 비교 |
+| `BiConsumer<T,U>` | `(T,U) → void` | `void accept(T t, U u)` | 두 값 처리 |
+| `BiFunction<T,U,R>` | `(T,U) → R` | `R apply(T t, U u)` | 두 값 변환 |
+
+[→ cheatsheet.md에서 전체 목록 보기](advanced/cheatsheet.md)
 
 ---
 
 ## 💡 핵심 정리
 
-### 람다 사용 시 기억할 것
+### 람다 사용 시 주의사항
 
 **1. 함수형 인터페이스에서만 사용**
 ```java
@@ -478,13 +488,12 @@ h.apply(1);  // (1 * 2) + 1 = 3
 Runnable r = () -> System.out.println("Hello");
 
 // ❌ 에러: List는 함수형 인터페이스 아님
-List<String> list = () -> new ArrayList<>();  // 컴파일 에러!
+List<String> list = () -> new ArrayList<>();
 ```
 
 **2. 예외 처리**
 ```java
-// 람다 내부에서 try-catch
-Function<String, Integer> parse = (String s) -> {
+Function<String, Integer> parse = s -> {
     try {
         return Integer.parseInt(s);
     } catch (NumberFormatException e) {
@@ -496,8 +505,7 @@ Function<String, Integer> parse = (String s) -> {
 **3. 지역 변수는 final**
 ```java
 int value = 10;
-// value는 effectively final이어야 함
-Supplier<Integer> s = () -> value;
+Supplier<Integer> s = () -> value;  // OK
 // value = 20;  // 이러면 컴파일 에러!
 ```
 
@@ -507,59 +515,64 @@ Supplier<Integer> s = () -> value;
 Consumer<String> c = s -> list.add(s);  // OK!
 ```
 
+[→ qa-sessions.md에서 자주 묻는 질문 보기](advanced/qa-sessions.md)
+
 ---
 
 ## 🎯 실전 패턴
 
-### 패턴 1: 전략 패턴
+### Pattern 1: 전략 패턴
 
 ```java
-// 전략 인터페이스
 interface ValidationStrategy {
     boolean execute(String s);
 }
 
-// 람다로 전략 전달
-Validator numericValidator = new Validator(
-    (String s) -> s.matches("\\d+")
-);
-
-Validator lowerCaseValidator = new Validator(
-    (String s) -> s.matches("[a-z]+")
-);
+Validator numericValidator = new Validator(s -> s.matches("\\d+"));
+Validator lowerCaseValidator = new Validator(s -> s.matches("[a-z]+"));
 ```
 
----
-
-### 패턴 2: 템플릿 메서드 패턴
+### Pattern 2: 템플릿 메서드 패턴
 
 ```java
-// 추상 클래스 대신 람다
 void processCustomer(int id, Consumer<Customer> makeCustomerHappy) {
     Customer c = Database.getCustomerWithId(id);
     makeCustomerHappy.accept(c);
 }
 
-// 사용
-processCustomer(1337, (Customer c) -> 
-    System.out.println("Hello " + c.getName()));
+processCustomer(1337, c -> System.out.println("Hello " + c.getName()));
 ```
 
----
-
-### 패턴 3: 옵저버 패턴
+### Pattern 3: 옵저버 패턴
 
 ```java
-interface Observer {
-    void notify(String tweet);
-}
-
-// 람다로 옵저버 등록
-feed.registerObserver((String tweet) -> {
+feed.registerObserver(tweet -> {
     if (tweet != null && tweet.contains("money")) {
         System.out.println("Breaking news: " + tweet);
     }
 });
+```
+
+---
+
+## 📂 학습 자료 구조
+
+```
+chapter03/
+├── README.md                        # 👈 현재 문서
+├── code/                            # 실습 코드
+│   ├── Apple.java                   # 도메인 클래스
+│   ├── Color.java                   # Enum
+│   ├── ExecuteAroundPattern.java    # 실행 어라운드 패턴
+│   ├── FunctionalInterfaceExamples.java # 함수형 인터페이스
+│   ├── LambdaBasics.java            # 람다 기초
+│   ├── LambdaComposition.java       # 람다 조합
+│   ├── MethodReferenceExamples.java # 메서드 참조
+│   └── SortingEvolution.java        # 정렬의 진화
+└── advanced/                        # 심화 학습
+    ├── deep-dive.md                 # 상세 원리 (8개 심화 주제)
+    ├── cheatsheet.md                # 빠른 참조 가이드
+    └── qa-sessions.md               # Q&A 세션 (20+ 질문)
 ```
 
 ---
@@ -569,7 +582,6 @@ feed.registerObserver((String tweet) -> {
 ### 스택 트레이스 읽기
 
 ```java
-// 람다에서 예외 발생 시
 list.stream()
     .map(s -> s.toUpperCase())
     .forEach(System.out::println);
@@ -579,48 +591,97 @@ list.stream()
 // at java.util.stream.ReferencePipeline...
 ```
 
-**해결:** 
+**해결책:**
 - 람다를 메서드로 추출
 - 디버거의 람다 브레이크포인트 사용
+- `peek()`으로 중간값 확인
 
 ---
 
-## 📁 코드 예시
+## ⚡ Quick Reference
 
-이 챕터의 모든 예제 코드는 `code/` 디렉토리에서 확인할 수 있습니다:
+### 가장 자주 사용하는 10가지 패턴
 
-- `ExecuteAroundPattern.java` - 실행 어라운드 패턴
-- `FunctionalInterfaceExamples.java` - 함수형 인터페이스 사용법
-- `MethodReferenceExamples.java` - 메서드 참조
-- `LambdaCompositionExamples.java` - 람다 조합
-- `TypeInferenceExamples.java` - 형식 추론과 검사
+```java
+// 1. 필터링
+filter(list, x -> condition)
+
+// 2. Predicate 조합
+filter(list, pred1.and(pred2).or(pred3))
+
+// 3. 각 요소 처리
+forEach(list, x -> System.out.println(x))
+
+// 4. 값 변환
+map(list, x -> x.getValue())
+
+// 5. 정렬
+list.sort(comparing(X::getValue))
+
+// 6. 역순 정렬
+list.sort(comparing(X::getValue).reversed())
+
+// 7. 다중 정렬
+list.sort(comparing(X::getFirst).thenComparing(X::getSecond))
+
+// 8. 생성자 참조
+map(list, Apple::new)
+
+// 9. Function 조합
+f.andThen(g).apply(x)
+
+// 10. 메서드 참조 4가지
+Integer::parseInt           // 정적 메서드
+String::toUpperCase         // 임의 객체
+obj::getValue               // 기존 객체
+Apple::new                  // 생성자
+```
 
 ---
 
-## 📖 더 깊이 학습하기
+## 🎯 학습 체크리스트
 
-`advanced/` 디렉토리에서 심화 학습 자료를 확인하세요:
-
-- `cheatsheet.md` - 빠른 참조 가이드
-- `deep-dive.md` - 내부 동작 원리
-- `qa-sessions.md` - 자주 묻는 질문
-
----
-
-## ✅ 체크리스트
-
-이 챕터를 완료한 후 확인하세요:
-
-- [ ] 람다 표현식을 작성할 수 있다
-- [ ] 함수형 인터페이스를 이해하고 사용할 수 있다
-- [ ] Predicate, Consumer, Function을 사용할 수 있다
-- [ ] 메서드 참조를 사용할 수 있다
-- [ ] 람다의 형식 검사 과정을 이해한다
-- [ ] 지역 변수 제약의 이유를 안다
-- [ ] Comparator, Predicate, Function 조합을 사용할 수 있다
+- [ ] 람다 표현식을 **자신의 언어로** 설명할 수 있다
+- [ ] 함수형 인터페이스의 **조건**을 말할 수 있다
+- [ ] **Predicate, Consumer, Function**의 차이를 구분할 수 있다
+- [ ] 메서드 참조 **4가지 유형**을 사용할 수 있다
+- [ ] 형식 검사 과정을 **단계별로** 설명할 수 있다
+- [ ] 지역 변수 제약의 **이유**를 메모리 관점에서 설명할 수 있다
+- [ ] **Comparator, Predicate, Function** 조합을 사용할 수 있다
+- [ ] 기본형 특화의 **성능 이점**을 설명할 수 있다
 
 ---
 
-## 🎓 다음 단계
+## 📖 더 알아보기
 
-**Chapter 04: 스트림 소개**에서는 람다를 활용하여 컬렉션을 선언형으로 처리하는 방법을 배웁니다!
+- [Deep Dive](advanced/deep-dive.md) - 8개 심화 주제 (예외 처리, Optional, reduce, 박싱 등)
+- [CheatSheet](advanced/cheatsheet.md) - 빠른 참조 가이드 (함수형 인터페이스 전체 목록)
+- [Q&A Sessions](advanced/qa-sessions.md) - 20+ 질문 답변
+
+---
+
+## 🚀 다음 단계
+
+이제 **Chapter 4: 스트림 소개**로 넘어갈 준비가 되었습니다!
+
+Chapter 4에서는:
+- **스트림 API**의 개념과 특징
+- **내부 반복 vs 외부 반복**
+- **중간 연산과 최종 연산**
+- **스트림과 컬렉션**의 차이
+- **람다를 활용한 선언형 데이터 처리**
+
+를 학습합니다.
+
+---
+
+<div align="center">
+
+**💡 Key Takeaway**
+
+> *"람다 표현식은 동작 파라미터화를 간결하게 만든다.*  
+> *메서드 참조로 더욱 간결하게, 조합으로 더욱 강력하게!"*
+
+**🌟 람다를 마스터하면, 함수형 프로그래밍의 진정한 힘을 경험할 수 있습니다!**
+
+</div>
