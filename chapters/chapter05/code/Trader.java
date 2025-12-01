@@ -2,6 +2,13 @@ package chapter05.code;
 
 import java.util.Objects;
 
+/**
+ * 거래자 도메인 모델
+ * 
+ * 속성:
+ * - name: 거래자 이름
+ * - city: 근무 도시
+ */
 public class Trader {
 
   private String name;
@@ -50,5 +57,4 @@ public class Trader {
   public String toString() {
     return String.format("Trader:%s in %s", name, city);
   }
-
 }

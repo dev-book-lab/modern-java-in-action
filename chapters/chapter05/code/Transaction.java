@@ -2,6 +2,14 @@ package chapter05.code;
 
 import java.util.Objects;
 
+/**
+ * 거래 도메인 모델
+ * 
+ * 속성:
+ * - trader: 거래자
+ * - year: 거래 연도
+ * - value: 거래 금액
+ */
 public class Transaction {
 
   private Trader trader;
@@ -55,5 +63,4 @@ public class Transaction {
   public String toString() {
     return String.format("{%s, year: %d, value: %d}", trader, year, value);
   }
-
 }
