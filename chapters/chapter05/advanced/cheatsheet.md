@@ -2,7 +2,7 @@
 
 > 스트림 활용의 핵심만 빠르게!
 
-[이전 내용이 너무 길어서 요약 버전으로 다시 작성...]
+---
 
 ## 🎯 필터링
 
@@ -84,6 +84,32 @@ Stream.generate(Math::random).limit(5)
 
 ---
 
+## ⚡ 지연 평가 (Lazy Evaluation)
+
+**핵심 개념:**
+- 중간 연산은 실행하지 않고 **기록만** 함
+- 최종 연산이 호출될 때 **한 번에 실행**
+- 필요한 만큼만 처리 (쇼트서킷)
+
+**예시:**
+```java
+list.stream()
+    .filter(n -> {
+        System.out.println("filter: " + n);
+        return n % 2 == 0;
+    })
+    .map(n -> {
+        System.out.println("map: " + n);
+        return n * n;
+    })
+    .limit(2);
+// 아무것도 출력 안 됨! (최종 연산 없음)
+
+// .collect(toList()) 추가하면 출력 시작!
+```
+
+---
+
 ## 💡 자주 쓰는 패턴
 
 ### 필터 + 맵 + 수집
@@ -107,14 +133,34 @@ stream.findAny()
     .ifPresent(System.out::println);
 ```
 
+### 실전 쿼리 패턴
+```java
+// 특정 조건 필터링 + 정렬 + 수집
+transactions.stream()
+    .filter(t -> t.getYear() == 2011)
+    .sorted(comparing(Transaction::getValue))
+    .collect(toList());
+
+// 그룹별 추출 + 중복 제거
+transactions.stream()
+    .map(t -> t.getTrader().getCity())
+    .distinct()
+    .collect(toList());
+
+// 조건 검사
+transactions.stream()
+    .anyMatch(t -> t.getTrader().getCity().equals("Milan"));
+```
+
 ---
 
 ## ⚠️ 주의사항
 
-1. **스트림 재사용 불가**
-2. **무한 스트림에 limit 필수**
-3. **파일 스트림 close 필수**
-4. **박싱 비용 주의 → 기본형 스트림 사용**
+1. **스트림 재사용 불가** - 한 번만 소비
+2. **무한 스트림에 limit 필수** - 아니면 무한 루프
+3. **파일 스트림 close 필수** - try-with-resources 사용
+4. **박싱 비용 주의** - 기본형 스트림 사용
+5. **지연 평가 이해** - 최종 연산 없으면 실행 안 됨
 
 ---
 
@@ -129,5 +175,23 @@ stream.mapToInt(...).sum()
 
 // ✅ 쇼트서킷 활용
 stream.anyMatch(...) // 찾으면 즉시 종료
+
+// ✅ limit 활용 (조기 종료)
+stream.filter(...).limit(10)
 ```
 
+---
+
+## 📊 성능 비교
+
+| 연산 | 전체 순회 | 조기 종료 |
+|------|----------|----------|
+| filter | ✅ | ❌ |
+| map | ✅ | ❌ |
+| anyMatch | ❌ | ✅ |
+| limit | ❌ | ✅ |
+| takeWhile | ❌ | ✅ |
+
+---
+
+**마지막 업데이트**: 2024년 12월

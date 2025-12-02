@@ -13,6 +13,8 @@
 5. [기본형 특화 스트림](#5-기본형-특화-스트림)
 6. [스트림 생성](#6-스트림-생성)
 7. [무한 스트림](#7-무한-스트림)
+8. [지연 평가 (Lazy Evaluation)](#8-지연-평가-lazy-evaluation)
+9. [실전 쿼리 패턴](#9-실전-쿼리-패턴)
 
 ---
 
@@ -477,6 +479,255 @@ Stream.iterate(0, n -> n + 1)
 
 ---
 
+## 8. 지연 평가 (Lazy Evaluation)
+
+### 8.1 지연 평가란?
+
+**핵심 개념:**
+- 스트림의 중간 연산은 **즉시 실행되지 않음**
+- 최종 연산이 호출될 때까지 **기록만** 함
+- 최종 연산 시 **한 번에 실행**
+
+**장점:**
+1. **성능 최적화** - 필요한 만큼만 처리
+2. **쇼트서킷** - 조건 만족하면 즉시 종료
+3. **파이프라인 최적화** - 중간 연산 병합 가능
+
+### 8.2 동작 방식
+
+**예제:**
+```java
+List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
+
+List<Integer> result = numbers.stream()
+    .filter(n -> {
+        System.out.println("filtering " + n);
+        return n % 2 == 0;
+    })
+    .map(n -> {
+        System.out.println("mapping " + n);
+        return n * n;
+    })
+    .limit(2)
+    .collect(toList());
+```
+
+**출력 (지연 평가):**
+```
+filtering 1
+filtering 2
+mapping 2        ← 2는 통과, 즉시 map
+filtering 3
+filtering 4
+mapping 4        ← 4는 통과, 즉시 map
+                 ← limit(2) 달성, 즉시 종료!
+```
+
+**만약 즉시 평가라면:**
+```
+filtering 1
+filtering 2
+filtering 3
+filtering 4
+filtering 5
+filtering 6
+filtering 7
+filtering 8      ← 전체 filter 먼저
+mapping 2
+mapping 4
+mapping 6
+mapping 8        ← 전체 map 후
+                 ← 마지막에 limit
+```
+
+### 8.3 지연 평가 vs 즉시 평가
+
+| 특성 | 지연 평가 (Stream) | 즉시 평가 (Collection) |
+|------|-------------------|----------------------|
+| **실행 시점** | 최종 연산 시 | 즉시 |
+| **처리 방식** | 요소별 파이프라인 | 단계별 전체 처리 |
+| **메모리** | 효율적 | 중간 결과 저장 |
+| **쇼트서킷** | 가능 | 불가능 |
+
+### 8.4 실전 예제
+
+**최종 연산 없으면 실행 안 됨:**
+```java
+Stream<String> stream = list.stream()
+    .filter(s -> {
+        System.out.println("filter: " + s);
+        return s.length() > 3;
+    });
+// 아무것도 출력 안 됨!
+
+stream.collect(toList());
+// 이제 출력 시작!
+```
+
+**쇼트서킷과 지연 평가:**
+```java
+list.stream()
+    .filter(expensiveOperation)
+    .findFirst();
+// 첫 번째 요소 찾으면 즉시 종료!
+// 나머지 요소는 처리하지 않음
+```
+
+### 8.5 지연 평가의 이점
+
+**1. 성능 최적화:**
+```java
+// 100만 개 중 3개만 필요
+bigList.stream()
+    .filter(...)
+    .limit(3)
+    .collect(toList());
+// 3개 찾으면 즉시 종료! (지연 평가)
+```
+
+**2. 무한 스트림 처리:**
+```java
+Stream.iterate(0, n -> n + 1)
+    .filter(n -> n % 2 == 0)
+    .limit(10)
+    .collect(toList());
+// 무한 스트림이지만 limit으로 제한 가능!
+```
+
+**3. 파이프라인 최적화:**
+```java
+// 컴파일러가 최적화 가능
+stream
+    .filter(a)
+    .filter(b)
+    .map(c)
+// → filter(a && b).map(c) 로 병합 가능
+```
+
+---
+
+## 9. 실전 쿼리 패턴
+
+### 9.1 데이터 모델
+
+**Trader (거래자):**
+```java
+class Trader {
+    String name;
+    String city;
+}
+```
+
+**Transaction (거래):**
+```java
+class Transaction {
+    Trader trader;
+    int year;
+    int value;
+}
+```
+
+### 9.2 8가지 실전 쿼리
+
+**질의 1: 특정 연도 거래 정렬**
+```java
+// 2011년 거래를 값 기준 오름차순 정렬
+List<Transaction> tr2011 = transactions.stream()
+    .filter(t -> t.getYear() == 2011)
+    .sorted(comparing(Transaction::getValue))
+    .collect(toList());
+```
+
+**질의 2: 고유 도시 추출**
+```java
+// 거래자가 근무하는 모든 고유 도시
+List<String> cities = transactions.stream()
+    .map(t -> t.getTrader().getCity())
+    .distinct()
+    .collect(toList());
+```
+
+**질의 3: 특정 도시 거래자 정렬**
+```java
+// Cambridge의 거래자를 이름순 정렬
+List<Trader> traders = transactions.stream()
+    .map(Transaction::getTrader)
+    .filter(trader -> trader.getCity().equals("Cambridge"))
+    .distinct()
+    .sorted(comparing(Trader::getName))
+    .collect(toList());
+```
+
+**질의 4: 모든 거래자 이름 정렬**
+```java
+// 알파벳순 정렬된 거래자 이름 문자열
+String traderStr = transactions.stream()
+    .map(t -> t.getTrader().getName())
+    .distinct()
+    .sorted()
+    .reduce("", (n1, n2) -> n1 + n2);
+```
+
+**질의 5: 특정 도시 거래자 존재 확인**
+```java
+// Milan 거주 거래자가 있는가?
+boolean milanBased = transactions.stream()
+    .anyMatch(t -> t.getTrader().getCity().equals("Milan"));
+```
+
+**질의 6: 특정 도시 거래 값 출력**
+```java
+// Cambridge 거래자의 모든 거래 값
+transactions.stream()
+    .filter(t -> "Cambridge".equals(t.getTrader().getCity()))
+    .map(Transaction::getValue)
+    .forEach(System.out::println);
+```
+
+**질의 7: 최고값 찾기**
+```java
+// 모든 거래의 최고값
+int highestValue = transactions.stream()
+    .map(Transaction::getValue)
+    .reduce(0, Integer::max);
+```
+
+**질의 8: 최소값 거래 찾기**
+```java
+// 가장 작은 값을 가진 거래
+Optional<Transaction> smallest = transactions.stream()
+    .min(comparing(Transaction::getValue));
+
+smallest
+    .map(String::valueOf)
+    .orElse("No transactions found");
+```
+
+### 9.3 패턴 분석
+
+**패턴 1: 필터 + 정렬 + 수집**
+```java
+stream.filter(...).sorted(...).collect(toList());
+```
+
+**패턴 2: 매핑 + 중복 제거**
+```java
+stream.map(...).distinct().collect(toList());
+```
+
+**패턴 3: 조건 검사**
+```java
+stream.anyMatch(...)  // boolean 반환
+```
+
+**패턴 4: 집계 연산**
+```java
+stream.map(...).reduce(0, Integer::max)
+stream.min(comparing(...))
+```
+
+---
+
 ## 💡 핵심 정리
 
 ### 필터링과 슬라이싱
@@ -508,6 +759,11 @@ Stream.iterate(0, n -> n + 1)
 - 배열: Arrays.stream
 - 파일: Files.lines
 - 무한: iterate, generate
+
+### 지연 평가
+- 중간 연산은 기록만
+- 최종 연산 시 실행
+- 쇼트서킷 최적화
 
 ---
 
