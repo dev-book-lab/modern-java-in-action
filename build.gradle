@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'me.champeau.jmh' version '0.7.2'
 }
 
 group = 'com.devbooklab'
@@ -15,12 +16,15 @@ repositories {
 }
 
 dependencies {
-    // JUnit 5
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
-
-    // AssertJ
     testImplementation 'org.assertj:assertj-core:3.24.2'
+
+    implementation 'org.openjdk.jmh:jmh-core:1.37'
+    annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+
+    jmhImplementation 'org.openjdk.jmh:jmh-core:1.37'
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 }
 
 test {
@@ -33,4 +37,16 @@ sourceSets {
             srcDirs = ['chapters']
         }
     }
+    jmh {
+        java {
+            srcDirs = ['chapters']
+        }
+    }
+}
+
+jmh {
+    fork = 1
+    warmupIterations = 1
+    iterations = 1
+    duplicateClassesStrategy = DuplicatesStrategy.WARN
 }
