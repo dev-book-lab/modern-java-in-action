@@ -136,27 +136,27 @@ public class LambdaBasics {
     System.out.println("(1) () -> 42");
     java.util.function.Supplier<Integer> s1 = () -> 42;
     System.out.println("    결과: " + s1.get());
-    
+
     // (2) 파라미터 하나, 표현식
     System.out.println("(2) (String s) -> s.length()");
-    java.util.function.Function<String, Integer> f1 = 
-        (String s) -> s.length();
+    java.util.function.Function<String, Integer> f1 =
+            (String s) -> s.length();
     System.out.println("    \"Hello\" 길이: " + f1.apply("Hello"));
-    
+
     // (3) 파라미터 여러 개, 표현식
-    System.out.println("(3) (int x, int y) -> x + y");
-    java.util.function.BiFunction<Integer, Integer, Integer> f2 = 
-        (int x, int y) -> x + y;
+    System.out.println("(3) (x, y) -> x + y");
+    java.util.function.BiFunction<Integer, Integer, Integer> f2 =
+            (x, y) -> x + y;  // ✅ 타입 추론 사용 (int 제거)
     System.out.println("    3 + 5 = " + f2.apply(3, 5));
-    
+
     // (4) 블록 스타일 (여러 문장)
-    System.out.println("(4) (int x, int y) -> { ... }");
-    java.util.function.BiFunction<Integer, Integer, Integer> f3 = 
-        (int x, int y) -> {
-          System.out.println("    계산 중...");
-          int sum = x + y;
-          return sum;
-        };
+    System.out.println("(4) (x, y) -> { ... }");
+    java.util.function.BiFunction<Integer, Integer, Integer> f3 =
+            (x, y) -> {  // ✅ 타입 추론 사용 (int 제거)
+              System.out.println("    계산 중...");
+              int sum = x + y;
+              return sum;
+            };
     System.out.println("    10 + 20 = " + f3.apply(10, 20));
   }
 
