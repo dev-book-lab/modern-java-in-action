@@ -95,7 +95,7 @@ File → Open → modern-java-in-action 폴더 선택
 
 각 챕터의 예제 코드를 실행하려면:
 
-1. `chapters/chapter01/examples/FilteringApples.java` 파일 열기
+1. `chapters/chapter01/code/FilteringApples.java` 파일 열기
 2. `main()` 메서드 좌측의 **▶️ 실행 버튼** 클릭
 3. 또는 **우측 상단의 실행 버튼** 클릭
 
