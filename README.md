@@ -45,9 +45,9 @@
 - [Chapter 11: null 대신 Optional 클래스](./chapters/chapter11/README.md)
 - [Chapter 12: 새로운 날짜와 시간 API](./chapters/chapter12/README.md)
 - [Chapter 13: 디폴트 메서드](./chapters/chapter13/README.md)
+- [Chapter 14: 자바 모듈 시스템](./chapters/chapter14/README.md)
 
 ### Part 5: 개선된 자바 동시성
-- [Chapter 14: 자바 모듈 시스템](./chapters/chapter14/README.md)
 - [Chapter 15: CompletableFuture와 리액티브 프로그래밍 컨셉의 기초](./chapters/chapter15/README.md)
 - [Chapter 16: CompletableFuture: 안정적 비동기 프로그래밍](./chapters/chapter16/README.md)
 - [Chapter 17: 리액티브 프로그래밍](./chapters/chapter17/README.md)

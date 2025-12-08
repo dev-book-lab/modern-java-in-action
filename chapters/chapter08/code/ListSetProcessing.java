@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * - 기존 방식과 새 방식 비교
  * - 성능 차이 측정
  */
-public class ListSetProcessingExample {
+public class ListSetProcessing {
 
   public static void main(String[] args) {
     System.out.println("=".repeat(80));

@@ -16,7 +16,7 @@ import java.util.Map;
  * - merge 활용법 마스터
  * - 실전 패턴 학습
  */
-public class MapPatternsExample {
+public class MapPatterns {
 
   public static void main(String[] args) {
     System.out.println("=".repeat(80));

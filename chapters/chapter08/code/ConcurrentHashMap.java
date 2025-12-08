@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.IntStream;
 
 /**
  * ConcurrentHashMap 완벽 가이드
@@ -16,7 +14,7 @@ import java.util.stream.IntStream;
  * - 성능 비교
  * - 실전 활용법
  */
-public class ConcurrentHashMapExample {
+public class ConcurrentHashMap {
 
   private static final int THREAD_COUNT = 10;
   private static final int OPERATIONS_PER_THREAD = 100_000;
@@ -50,7 +48,7 @@ public class ConcurrentHashMapExample {
 
     // 생성
     System.out.println("📌 생성:");
-    Map<String, Integer> map = new ConcurrentHashMap<>();
+    Map<String, Integer> map = new java.util.concurrent.ConcurrentHashMap<>();
     System.out.println("   생성: " + map);
 
     // 추가
@@ -90,7 +88,7 @@ public class ConcurrentHashMapExample {
     System.out.println("   " + hashMap + " ✅");
 
     System.out.println("\n📌 ConcurrentHashMap - Null 불허:");
-    Map<String, Integer> concMap = new ConcurrentHashMap<>();
+    Map<String, Integer> concMap = new java.util.concurrent.ConcurrentHashMap<>();
     
     try {
       concMap.put("key", null);
@@ -123,7 +121,7 @@ public class ConcurrentHashMapExample {
   private static void demonstrateAtomicOperations() {
     System.out.println("\n3️⃣  원자적 연산\n");
 
-    Map<String, Integer> map = new ConcurrentHashMap<>();
+    Map<String, Integer> map = new java.util.concurrent.ConcurrentHashMap<>();
     map.put("counter", 0);
 
     // putIfAbsent
@@ -166,7 +164,7 @@ public class ConcurrentHashMapExample {
   private static void demonstrateBulkOperations() {
     System.out.println("\n4️⃣  병렬 연산\n");
 
-    ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+    java.util.concurrent.ConcurrentHashMap<String, Integer> map = new java.util.concurrent.ConcurrentHashMap<>();
     map.put("A", 10);
     map.put("B", 20);
     map.put("C", 30);
@@ -318,7 +316,7 @@ public class ConcurrentHashMapExample {
    * ConcurrentHashMap 벤치마크
    */
   private static long benchmarkConcurrentHashMap() throws InterruptedException {
-    Map<Integer, Integer> map = new ConcurrentHashMap<>();
+    Map<Integer, Integer> map = new java.util.concurrent.ConcurrentHashMap<>();
     long start = System.currentTimeMillis();
 
     Thread[] threads = new Thread[THREAD_COUNT];
@@ -347,7 +345,7 @@ public class ConcurrentHashMapExample {
   private static void demonstratePitfalls() {
     System.out.println("\n6️⃣  주의사항\n");
 
-    ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+    java.util.concurrent.ConcurrentHashMap<String, Integer> map = new java.util.concurrent.ConcurrentHashMap<>();
     map.put("A", 1);
     map.put("B", 2);
     map.put("C", 3);
@@ -370,7 +368,7 @@ public class ConcurrentHashMapExample {
 
     // 복합 연산
     System.out.println("\n📌 복합 연산 주의:");
-    ConcurrentHashMap<String, Integer> counter = new ConcurrentHashMap<>();
+    java.util.concurrent.ConcurrentHashMap<String, Integer> counter = new java.util.concurrent.ConcurrentHashMap<>();
     counter.put("count", 0);
     
     System.out.println("   ❌ 잘못된 방식:");

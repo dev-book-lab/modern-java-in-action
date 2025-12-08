@@ -19,7 +19,7 @@ import java.util.Set;
  * - 불변 컬렉션의 특성 파악
  * - 언제 어떤 방법을 사용할지 판단
  */
-public class CollectionFactoryExample {
+public class CollectionFactory {
 
   public static void main(String[] args) {
     System.out.println("=".repeat(80));

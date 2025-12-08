@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * computeIfAbsent를 활용한 캐시 구현 예제
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
  * - 문자열에 대한 SHA-256 해시 계산 (비용이 큰 연산)
  * - 같은 문자열은 한 번만 계산하고 재사용
  */
-public class CacheExample {
+public class Cache {
 
   /**
    * SHA-256 해시 생성기
@@ -32,13 +31,13 @@ public class CacheExample {
   private MessageDigest messageDigest;
 
   public static void main(String[] args) {
-    new CacheExample().run();
+    new Cache().run();
   }
 
   /**
    * 생성자: MessageDigest 초기화
    */
-  public CacheExample() {
+  public Cache() {
     try {
       messageDigest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {
