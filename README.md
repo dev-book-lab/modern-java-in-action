@@ -4,7 +4,7 @@
 
 # 📚 Modern Java in Action - 학습 노트
 
-> Claude AI와 함께 정리한 모던 자바 인 액션 학습 저장소
+> AI와 함께 정리한 모던 자바 인 액션 학습 저장소
 
 [![GitHub](https://img.shields.io/badge/GitHub-dev--book--lab-181717?style=flat-square&logo=github)](https://github.com/dev-book-lab/modern-java-in-action)
 ![Java](https://img.shields.io/badge/Java-21+-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
@@ -16,7 +16,7 @@
 
 이 저장소는 "Modern Java in Action" 책을 학습하면서 작성한 정리 노트입니다.
 
-- 🤖 AI(Claude)를 활용한 심층적인 개념 설명
+- 🤖 AI를 활용한 심층적인 개념 설명
 - 💻 실전 예제 코드
 - 📝 한국어로 작성된 자세한 설명
 - 🔍 "왜?"에 대한 깊이 있는 탐구
