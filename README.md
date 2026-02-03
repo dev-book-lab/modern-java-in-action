@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="images/cover.png" alt="Modern Java in Action" width="300" />
+  <img src="images/cover.png" alt="Modern Java in Action" width="400" />
 </div>
 
 # 📚 Modern Java in Action - 학습 노트
